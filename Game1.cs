@@ -11,16 +11,25 @@ namespace BotShooter
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         
+        // MAP
         private Map map;
-        private Dictionary<int, Texture2D> mapTextures = new Dictionary<int, Texture2D>();
         private const int tileSize = 64;
-        private Vector2 startPosition = new Vector2(14 * tileSize, 9 * tileSize);
+        private Vector2 startPosition = new Vector2(15 * tileSize, 11 * tileSize);
+
+        // TOWER
+        private Tower tower;
+        
+        //INTERFACE BAR
         private Texture2D black;
 
+        // PLAYER
         private Player player;
-        private Texture2D playerTexture;
 
-        private Vector2 cameraMove;
+        // CAMERA
+        private Camera camera;
+
+        // ENEMIES
+        private Enemies enemies;
 
         public Game1()
         {
@@ -31,9 +40,22 @@ namespace BotShooter
 
         protected override void Initialize()
         {
+            // MAP
             map = new Map();
+
+            // TOWER
+            tower = new Tower(new Vector2(13, 8)); 
+
+            // PLAYER
             player = new Player(new Vector2(startPosition.X, startPosition.Y), 0, 100, 8);
-            cameraMove = new Vector2(startPosition.X - 7 * tileSize, startPosition.Y - 5 * tileSize);
+
+            // CAMERA
+            camera = new Camera(new Vector2(startPosition.X - 7 * tileSize, startPosition.Y - 5 * tileSize));
+
+            // ENEMIES
+            enemies = new Enemies();
+            for(int i = 1; i <= 8; i++)
+                enemies.enemies.Add(new Enemy(i, new Vector2(10 * tileSize, 5 * tileSize) + new Vector2(i * tileSize, 0)));
 
             _graphics.PreferredBackBufferWidth = 15 * tileSize;
             _graphics.PreferredBackBufferHeight = 13 * tileSize;
@@ -45,12 +67,20 @@ namespace BotShooter
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            
-            mapTextures[0] = Content.Load<Texture2D>("map0");
+
+            //MAP
+            map.LoadTexture(Content);
             black = Content.Load<Texture2D>("black");
 
-            playerTexture = Content.Load<Texture2D>("men");
-            }
+            // TOWER
+            tower.LoadTexture(Content);
+
+            //PLAYER
+            player.LoadTexture(Content);
+
+            // ENEMY
+            enemies.LoadTexture(Content);
+        }
 
         protected override void Update(GameTime gameTime)
         {
@@ -60,47 +90,31 @@ namespace BotShooter
                 Exit();
 
             // PLAYER MOVE
-            if (keyboardState.IsKeyDown(Keys.A) && player.position.X > 0)
-                player.position.X -= player.speed;
-            if (keyboardState.IsKeyDown(Keys.D) && player.position.X + tileSize < map.width * tileSize)
-                player.position.X += player.speed;
-            if (keyboardState.IsKeyDown(Keys.W) && player.position.Y > 0)
-                player.position.Y -= player.speed;
-            if (keyboardState.IsKeyDown(Keys.S) && player.position.Y + tileSize < map.height * tileSize)
-                player.position.Y += player.speed;
+            player.Move(keyboardState, map, tower, tileSize);
 
             // CAMERA MOVE
-            if (keyboardState.IsKeyDown(Keys.A) && player.position.X <= map.width * tileSize - 8 * tileSize && cameraMove.X > 0)
-                cameraMove.X -= player.speed;
-            if (keyboardState.IsKeyDown(Keys.D) && player.position.X >= 7 * tileSize && cameraMove.X < map.width * tileSize - 15 * tileSize)
-                cameraMove.X += player.speed;
-            if (keyboardState.IsKeyDown(Keys.W) && player.position.Y <= map.height * tileSize - 6 * tileSize && cameraMove.Y > 0)
-                cameraMove.Y -= player.speed;
-            if (keyboardState.IsKeyDown(Keys.S) && player.position.Y >= 5 * tileSize && cameraMove.Y < map.height * tileSize - 11 * tileSize)
-                cameraMove.Y += player.speed;
+            camera.Move(keyboardState, map, player, tileSize);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
 
             // MAP
-            for (int i = 0; i < map.mapTiles.GetLength(0); i++)
-                for (int j = 0; j < map.mapTiles.GetLength(1); j++)
-                    _spriteBatch.Draw(mapTextures[map.mapTiles[i, j].textureNum], 
-                        new Rectangle((int)(map.mapTiles[i, j].vector.X) * tileSize - (int)cameraMove.X, (int)(map.mapTiles[i, j].vector.Y) * tileSize - (int)cameraMove.Y, tileSize, tileSize),
-                        new Rectangle(0, 0, 16, 16),
-                        Color.White);
+            map.Draw(_spriteBatch, camera, tileSize);
+
+            // TOWER
+            tower.Draw(_spriteBatch, camera, tileSize);
+
+            // ENEMIES
+            enemies.DrawAll(_spriteBatch, camera, tileSize);
 
             // PLAYER
-            _spriteBatch.Draw(playerTexture,
-                new Rectangle((int)(player.position.X) - (int)cameraMove.X, (int)(player.position.Y) - (int)cameraMove.Y, tileSize, tileSize),
-                new Rectangle(0, 0, 16, 16),
-                Color.White);
+            player.Draw(_spriteBatch, camera, tileSize);
 
             // DOWN BAR
             _spriteBatch.Draw(black, new Rectangle(0, 11 * tileSize, 15 * tileSize, 2 * tileSize), Color.Black);
