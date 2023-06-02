@@ -1,3 +1,3 @@
 ﻿
-using var game = new BotShooter.Game1();
+using var game = new VillageDefence.Game1();
 game.Run();

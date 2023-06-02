@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BotShooter
+namespace VillageDefence
 {
     internal class Camera
     {
@@ -17,7 +17,7 @@ namespace BotShooter
             coord = vector;
         }
 
-        public void Move(KeyboardState keyboardState, Map map, Player player, int tileSize)
+        public void Update(KeyboardState keyboardState, Map map, Player player, int tileSize)
         {
             int x = 0;
             if (player.position.X - 7 * tileSize > 0)

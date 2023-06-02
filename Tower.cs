@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using System.Windows.Forms;
 using System.Collections.Generic;
 
-namespace BotShooter
+namespace VillageDefence
 {
     internal class Tower
     {
@@ -15,6 +15,8 @@ namespace BotShooter
         public MapTile[,] towerTiles;
         public readonly int height;
         public readonly int width;
+        public readonly int maxHp;
+        public int hp;
 
         public Tower(Vector2 position)
         {
@@ -22,6 +24,8 @@ namespace BotShooter
             towerTiles = CreateTower(towerElements, position);
             height = towerElements.GetLength(0);
             width = towerElements.GetLength(1);
+            hp = 1000;
+            maxHp = 1000;
         }
 
         private static MapTile[,] CreateTower(int[,] towerElements, Vector2 position)
@@ -41,7 +45,12 @@ namespace BotShooter
         {
             return new Rectangle((vector * tileSize).ToPoint(), new Point(tileSize * width, tileSize * height));
         }
+        public Vector2 GetCenterPosition(int tileSize)
+        {
+            return vector * tileSize + new Vector2(tileSize * width / 2, tileSize * height / 2);
+        }
 
+        // FROM GAME
         public void LoadTexture(ContentManager Content)
         {
             towerTextures[1] = Content.Load<Texture2D>("tower6");
@@ -53,8 +62,8 @@ namespace BotShooter
             towerTextures[7] = Content.Load<Texture2D>("tower12");
             towerTextures[8] = Content.Load<Texture2D>("tower13");
             towerTextures[9] = Content.Load<Texture2D>("tower14");
-            towerTextures[10] = Content.Load<Texture2D>("tower15");
-            towerTextures[11] = Content.Load<Texture2D>("tower16");
+            towerTextures[10] = Content.Load<Texture2D>("window");
+            towerTextures[11] = Content.Load<Texture2D>("door");
             towerTextures[12] = Content.Load<Texture2D>("tower17");
         }
 

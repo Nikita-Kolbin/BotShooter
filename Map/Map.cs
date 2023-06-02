@@ -5,13 +5,15 @@ using Microsoft.Xna.Framework.Content;
 using System.Windows.Forms;
 using System.Collections.Generic;
 
-namespace BotShooter
+namespace VillageDefence
 {
     internal class Map
     {
         private Dictionary<int, Texture2D> mapTextures = new();
         static int[,] mapElements = Map1.map;
+        static int[,] objects = Map1.objects;
         public MapTile[,] mapTiles = CreateMap(mapElements);
+        public MapTile[,] mapObjects = CreateMap(objects);
         public readonly int height = mapElements.GetLength(0);
         public readonly int width = mapElements.GetLength(1);
 
@@ -33,13 +35,18 @@ namespace BotShooter
             return mapTiles[y / tileSize, x / tileSize].textureNum;
         }
 
+        // FROM GAME
         public void LoadTexture(ContentManager Content)
         {
             mapTextures[1] = Content.Load<Texture2D>("map1");
             mapTextures[2] = Content.Load<Texture2D>("map2");
             mapTextures[3] = Content.Load<Texture2D>("map3");
             mapTextures[4] = Content.Load<Texture2D>("map4");
-            mapTextures[5] = Content.Load<Texture2D>("map5");
+            mapTextures[5] = Content.Load<Texture2D>("map5");       
+            mapTextures[8] = Content.Load<Texture2D>("map_obj1");
+            mapTextures[9] = Content.Load<Texture2D>("map_obj2");
+            mapTextures[10] = Content.Load<Texture2D>("map_obj3");
+            mapTextures[11] = Content.Load<Texture2D>("map_obj4");
         }
 
         public void Draw(SpriteBatch _spriteBatch, Camera camera, int tileSize)
@@ -52,6 +59,20 @@ namespace BotShooter
                     _spriteBatch.Draw(mapTextures[mapTiles[i, j].textureNum],
                         new Rectangle((int)coord.X, (int)coord.Y, tileSize, tileSize),
                         new Rectangle(0, 0, 16, 16),
+                        Color.White);
+                }
+        }
+
+        public void DrawObjects(SpriteBatch _spriteBatch, Camera camera, int tileSize)
+        {
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                {
+                    if (mapObjects[i, j].textureNum == 0) continue;
+                    var coord = camera.FindCoord(mapObjects[i, j].vector * tileSize);
+                    _spriteBatch.Draw(mapTextures[mapObjects[i, j].textureNum],
+                        new Rectangle((int)coord.X, (int)coord.Y, tileSize, tileSize),
+                        null,
                         Color.White);
                 }
         }
